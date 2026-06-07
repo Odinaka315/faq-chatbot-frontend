@@ -1,91 +1,156 @@
-// src/components/Sidebar.jsx
+import { useLocation, Link } from "react-router-dom";
+
 export default function Sidebar() {
-  return (
-    <aside className="fixed top-0 left-0 bottom-0 z-10 flex flex-col w-[240px] min-h-screen border-r bg-surface border-border shrink-0">
-      {/* Logo Area */}
-      <div className="p-6 pb-5 border-b border-border">
-        <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center shrink-0 w-8 h-8 text-base rounded-lg bg-gold">
-            🎓
-          </div>
-          <div className="font-display text-[13px] font-bold leading-tight text-white">
-            UI Advisor
-            <span className="block font-sans text-[10px] font-normal mt-[1px] text-muted">
-              Admin Dashboard
-            </span>
-          </div>
-        </div>
-      </div>
+  const location = useLocation();
 
-      {/* Main Navigation */}
-      <div className="px-3 pt-5 pb-2">
-        <div className="px-2 mb-1.5 text-[9.5px] font-semibold tracking-[1.8px] uppercase text-muted">
-          Main
-        </div>
+  // Helper function to check if a path is currently active
+  const isActive = (path) => location.pathname === path;
 
-        {/* Active Item Example */}
-        <a
-          href="#"
-          className="relative flex items-center gap-2.5 px-3 py-2 mb-0.5 text-[13px] font-medium transition-all duration-150 rounded-lg no-underline bg-gold-dim text-gold"
-        >
-          <div className="absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-sm bg-gold"></div>
-          <span className="w-5 text-[15px] text-center">📊</span> Overview
-        </a>
+  // Reusable NavItem component to keep the code clean
+  const NavItem = ({ to, icon, label, badge, badgeColor = "red" }) => {
+    const active = isActive(to);
 
-        <a
-          href="#"
-          className="flex items-center gap-2.5 px-3 py-2 mb-0.5 text-[13px] font-medium transition-all duration-150 rounded-lg no-underline text-muted hover:bg-dim hover:text-text"
-        >
-          <span className="w-5 text-[15px] text-center">💬</span> Query Logs
-          <span className="px-1.5 py-[1px] ml-auto text-[10px] font-semibold text-white bg-red-500 rounded-full">
-            12
+    return (
+      <Link
+        to={to}
+        className={`group relative flex items-center justify-between rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors ${
+          active
+            ? "bg-surface2 text-gold"
+            : "text-muted hover:bg-white/5 hover:text-text"
+        }`}
+      >
+        {/* Active Left Border */}
+        {active && (
+          <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-md bg-gold"></div>
+        )}
+
+        <div className="flex items-center gap-3">
+          <span
+            className={`text-base ${active ? "opacity-100" : "opacity-70 group-hover:opacity-100 transition-opacity"}`}
+          >
+            {icon}
           </span>
-        </a>
+          <span>{label}</span>
+        </div>
 
-        <a
-          href="#"
-          className="flex items-center gap-2.5 px-3 py-2 mb-0.5 text-[13px] font-medium transition-all duration-150 rounded-lg no-underline text-muted hover:bg-dim hover:text-text"
-        >
-          <span className="w-5 text-[15px] text-center">🔍</span> Analytics
-        </a>
+        {/* Dynamic Badge */}
+        {badge && (
+          <span
+            className={`flex h-5 items-center justify-center rounded-full px-2 text-[10px] font-bold shadow-sm ${
+              badgeColor === "red"
+                ? "bg-red-500 text-white"
+                : "bg-gold/10 text-gold"
+            }`}
+          >
+            {badge}
+          </span>
+        )}
+      </Link>
+    );
+  };
+
+  return (
+    <aside className="fixed inset-y-0 left-0 w-[240px] flex flex-col border-r border-border bg-surface z-50">
+      {/* Top Logo Section */}
+      <div className="flex items-center gap-3 px-6 py-6 border-b border-border/50">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold text-lg shadow-lg">
+          🎓
+        </div>
+        <div>
+          <div className="font-display text-[15px] font-bold text-white leading-tight">
+            UI Advisor
+          </div>
+          <div className="text-[11px] text-muted mt-0.5">Admin Dashboard</div>
+        </div>
       </div>
 
-      {/* Knowledge Base Navigation */}
-      <div className="px-3 pt-5 pb-2">
-        <div className="px-2 mb-1.5 text-[9.5px] font-semibold tracking-[1.8px] uppercase text-muted">
-          Knowledge Base
-        </div>
-        <a
-          href="#"
-          className="flex items-center gap-2.5 px-3 py-2 mb-0.5 text-[13px] font-medium transition-all duration-150 rounded-lg no-underline text-muted hover:bg-dim hover:text-text"
-        >
-          <span className="w-5 text-[15px] text-center">📋</span> FAQ Manager
-        </a>
-        <a
-          href="#"
-          className="flex items-center gap-2.5 px-3 py-2 mb-0.5 text-[13px] font-medium transition-all duration-150 rounded-lg no-underline text-muted hover:bg-dim hover:text-text"
-        >
-          <span className="w-5 text-[15px] text-center">➕</span> Add FAQ Entry
-        </a>
-      </div>
-
-      <div className="flex-1"></div>
-
-      {/* User Area */}
-      <div className="flex items-center gap-2.5 p-4 pb-5 border-t border-border">
-        <div className="flex items-center justify-center shrink-0 w-8 h-8 text-sm border-2 rounded-full bg-surface2 border-gold-dim">
-          👤
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-xs font-semibold truncate text-text">
-            Admin User
+      {/* Main Navigation Links */}
+      <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-6 no-scrollbar">
+        {/* MAIN GROUP */}
+        <div>
+          <div className="mb-2 px-2 text-[10px] font-bold tracking-[0.15em] text-muted uppercase">
+            Main
           </div>
-          <div className="mt-[1px] text-[10.5px] text-muted">
-            Admission Unit
+          <div className="space-y-1">
+            <NavItem to="/dashboard" icon="📊" label="Overview" />
+            <NavItem
+              to="/dashboard/logs"
+              icon="💬"
+              label="Query Logs"
+              badge="12"
+              badgeColor="red"
+            />
+            <NavItem to="/dashboard/analytics" icon="🔍" label="Analytics" />
           </div>
         </div>
-        <div className="text-sm cursor-pointer text-muted hover:text-text transition-colors">
-          ↗
+
+        {/* KNOWLEDGE BASE GROUP */}
+        <div>
+          <div className="mb-2 px-2 text-[10px] font-bold tracking-[0.15em] text-muted uppercase">
+            Knowledge Base
+          </div>
+          <div className="space-y-1">
+            <NavItem to="/dashboard/faqs" icon="📋" label="FAQ Manager" />
+            <NavItem to="/dashboard/add-faq" icon="➕" label="Add FAQ Entry" />
+            <NavItem
+              to="/dashboard/categories"
+              icon="🏷️"
+              label="Categories"
+              badge="20"
+              badgeColor="gold"
+            />
+          </div>
+        </div>
+
+        {/* EVALUATION GROUP */}
+        <div>
+          <div className="mb-2 px-2 text-[10px] font-bold tracking-[0.15em] text-muted uppercase">
+            Evaluation
+          </div>
+          <div className="space-y-1">
+            <NavItem
+              to="/dashboard/accuracy"
+              icon="📈"
+              label="Accuracy Report"
+            />
+            <NavItem
+              to="/dashboard/test-suite"
+              icon="🧪"
+              label="Run Test Suite"
+            />
+            <NavItem to="/dashboard/export" icon="📥" label="Export Logs" />
+          </div>
+        </div>
+
+        {/* SYSTEM GROUP */}
+        <div>
+          <div className="mb-2 px-2 text-[10px] font-bold tracking-[0.15em] text-muted uppercase">
+            System
+          </div>
+          <div className="space-y-1">
+            <NavItem to="/dashboard/settings" icon="⚙️" label="Settings" />
+            <NavItem to="/" icon="🌐" label="View Live Site" />
+          </div>
+        </div>
+      </nav>
+
+      {/* Bottom User Profile Section */}
+      <div className="border-t border-border p-4 bg-surface">
+        <div className="flex cursor-pointer items-center justify-between rounded-xl p-2 transition-colors hover:bg-white/5 group">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-surface2 border border-border text-xs">
+              👤
+            </div>
+            <div className="text-left">
+              <div className="text-[12px] font-semibold text-white">
+                Admin User
+              </div>
+              <div className="text-[10px] text-muted">Admission Unit</div>
+            </div>
+          </div>
+          <span className="text-muted text-xs transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+            ↗
+          </span>
         </div>
       </div>
     </aside>

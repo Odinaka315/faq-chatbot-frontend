@@ -4,6 +4,8 @@ import DashboardLayout from "./Layout/DashboardLayout";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Overview from "./Pages/admin/Overview";
+import ExportLogs from "./Pages/admin/ExportLogs";
+
 // import StudentChatbot from "./pages/student/StudentChatbot"; // Future student app
 
 export default function App() {
@@ -23,6 +25,16 @@ export default function App() {
             <ProtectedRoute>
               <DashboardLayout>
                 <Overview />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/export"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ExportLogs />
               </DashboardLayout>
             </ProtectedRoute>
           }

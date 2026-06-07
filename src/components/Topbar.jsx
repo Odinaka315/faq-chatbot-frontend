@@ -1,5 +1,13 @@
 // src/components/Topbar.jsx
 export default function Topbar() {
+  const today = new Date();
+
+  const formattedDate = [
+    today.toLocaleDateString("en-GB", { weekday: "short" }),
+    today.toLocaleDateString("en-GB", { day: "2-digit" }),
+    today.toLocaleDateString("en-GB", { month: "short" }),
+    today.getFullYear(),
+  ].join(" ");
   return (
     <div className="sticky top-0 z-10 flex items-center h-[60px] px-7 gap-4 border-b shrink-0 bg-surface border-border">
       {/* Page Title */}
@@ -31,7 +39,7 @@ export default function Topbar() {
         </div>
 
         <div className="px-2.5 py-1 text-[11px] border rounded-md font-mono text-muted bg-surface2 border-border">
-          Mon 04 Jun 2026
+          {formattedDate}
         </div>
       </div>
     </div>
