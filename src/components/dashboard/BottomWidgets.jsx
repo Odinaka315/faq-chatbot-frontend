@@ -75,7 +75,7 @@ export function QueryCategories() {
 
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface">
-      <div className="border-b border-border px-5 py-4">
+      <div className="border-b border-border px-5 py-4 ">
         <div className="font-display text-[13px] font-bold text-white">
           Query Categories
         </div>
@@ -83,7 +83,7 @@ export function QueryCategories() {
           Distribution this month
         </div>
       </div>
-      <div className="flex flex-1 flex-col gap-3 p-5 overflow-y-auto max-h-[320px]">
+      <div className="flex flex-1 flex-col gap-3 p-5 overflow-y-auto max-h-[320px] no-scrollbar">
         {categories.map((cat, idx) => {
           const width = Math.round((cat.count / maxCount) * 100);
           return (

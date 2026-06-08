@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "../../services/api";
 
-// Helper component for dynamic badges
 const TrendBadge = ({ value }) => {
   if (!value || value === 0) return null;
 

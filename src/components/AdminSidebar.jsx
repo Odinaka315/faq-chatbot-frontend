@@ -4,7 +4,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
 
-  // Closes sidebar on mobile after clicking a link
   const handleNavClick = () => {
     if (window.innerWidth < 1024) setIsOpen(false);
   };
@@ -41,7 +40,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
   return (
     <>
-      {/* Mobile Overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"
@@ -49,7 +47,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         ></div>
       )}
 
-      {/* Sidebar Content */}
       <aside
         className={`fixed inset-y-0 left-0 w-[240px] flex flex-col border-r border-border bg-[#0b0f1a] z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
       >

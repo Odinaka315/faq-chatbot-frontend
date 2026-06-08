@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api"; // Your Axios instance
+import api from "../services/api";
 
 const AuthContext = createContext(null);
 
@@ -21,7 +21,6 @@ export function AuthProvider({ children }) {
           });
           setUser({ token, ...response.data });
         } catch (error) {
-          // If the token is expired or invalid, clear it out
           console.error("Session expired.");
           localStorage.removeItem("token");
         }
@@ -32,11 +31,10 @@ export function AuthProvider({ children }) {
     initializeAuth();
   }, []);
 
-  // Updated to accept userData alongside the token
   const login = (token, userData) => {
     localStorage.setItem("token", token);
     setUser({ token, ...userData });
-    navigate("/dashboard"); // Always route to dashboard for staff
+    navigate("/dashboard");
   };
 
   const logout = () => {

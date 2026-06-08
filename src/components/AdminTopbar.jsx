@@ -1,7 +1,6 @@
 export default function AdminTopbar({ toggleSidebar }) {
   return (
     <div className="sticky top-0 z-30 flex h-[64px] w-full items-center justify-between border-b border-border bg-surface px-5 lg:px-8">
-      {/* Left side: Hamburger and Title Context */}
       <div className="flex items-center gap-4">
         <button
           onClick={toggleSidebar}
@@ -23,9 +22,7 @@ export default function AdminTopbar({ toggleSidebar }) {
         </button>
       </div>
 
-      {/* Right side: Search, Bell, Date (Hidden on mobile) */}
       <div className="flex items-center gap-3 lg:gap-4 ml-auto">
-        {/* Search - Hidden on small screens */}
         <div className="hidden md:flex items-center gap-2 rounded-lg border border-border bg-surface2 px-3 py-1.5">
           <span className="text-muted text-xs">🔍</span>
           <input

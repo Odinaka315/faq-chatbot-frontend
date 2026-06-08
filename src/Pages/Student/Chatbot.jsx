@@ -189,7 +189,6 @@ export default function Chatbot() {
         </div>
       </div>
 
-      {/* ── APP BODY ── */}
       <div className="flex flex-1 overflow-hidden relative">
         {/* Overlay for mobile sidebar */}
         {isLeftSidebarOpen && (
@@ -263,7 +262,6 @@ export default function Chatbot() {
 
         {/* ── CHAT AREA ── */}
         <div className="flex-1 flex flex-col min-w-0 bg-[#f6f8fc]">
-          {/* Chat Header */}
           <div className="bg-white border-b border-mist px-4 lg:px-6 py-3 flex items-center gap-3 shrink-0">
             <div className="w-10 h-10 rounded-full bg-navy flex items-center justify-center text-lg shrink-0 shadow-[0_0_0_3px_rgba(13,33,73,0.08)]">
               🤖
@@ -296,7 +294,6 @@ export default function Chatbot() {
 
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-4 lg:p-6 flex flex-col gap-5 custom-scrollbar">
-            {/* Welcome Card */}
             {messages.length === 0 && (
               <div className="bg-white border-[1.5px] border-mist rounded-[20px] p-6 lg:p-8 max-w-[540px] w-full self-center my-auto shadow-[0_4px_20px_rgba(13,33,73,0.06)] text-center animate-in slide-in-from-bottom-4 fade-in duration-500">
                 <div className="text-[44px] mb-3">🎓</div>
@@ -329,7 +326,6 @@ export default function Chatbot() {
               </div>
             )}
 
-            {/* Render Messages */}
             {messages.map((m) => (
               <div
                 key={m.id}

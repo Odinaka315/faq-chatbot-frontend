@@ -6,11 +6,10 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-// Initialize the TanStack Query Client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false, // Prevents excessive API calls while developing
+      refetchOnWindowFocus: false,
       retry: 1,
     },
   },

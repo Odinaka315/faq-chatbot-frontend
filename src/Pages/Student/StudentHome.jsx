@@ -1,11 +1,7 @@
-import { Link } from "react-router-dom";
-
 export default function StudentHome() {
   return (
     <>
-      {/* ── HERO ── */}
       <section className="grid grid-cols-1 lg:grid-cols-2 min-h-screen pt-16 relative overflow-hidden">
-        {/* Left copy */}
         <div className="bg-navy px-14 py-20 flex flex-col justify-center relative overflow-hidden">
           {/* Decorative gradients/circles */}
           <div className="absolute -bottom-[120px] -left-[120px] w-[420px] h-[420px] rounded-full bg-[radial-gradient(circle,rgba(201,168,76,0.18)_0%,transparent_70%)] pointer-events-none"></div>

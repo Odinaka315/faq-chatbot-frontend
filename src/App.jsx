@@ -1,5 +1,4 @@
-// src/App.jsx
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import DashboardLayout from "./Layout/DashboardLayout";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -12,8 +11,6 @@ import Student404 from "./Pages/Student/Student404";
 import Admin404 from "./Pages/admin/Admin404";
 import AdminUnderDev from "./Pages/admin/AdminUnderDev";
 import StudentComingSoon from "./Pages/Student/StudentComingSoon";
-
-// import StudentChatbot from "./pages/student/StudentChatbot"; // Future student app
 
 export default function App() {
   return (

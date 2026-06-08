@@ -22,8 +22,7 @@ export default function TrendChart() {
       ? trends
       : Array(14).fill({ timestamp: new Date().toISOString(), query_count: 0 });
 
-  // Find the highest volume day to scale the bars relative to 100% height
-  const maxVolume = Math.max(...chartData.map((d) => d.query_count), 1); // Avoid division by zero
+  const maxVolume = Math.max(...chartData.map((d) => d.query_count), 1);
 
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-surface">
@@ -60,7 +59,6 @@ export default function TrendChart() {
                   className="group relative w-full cursor-pointer rounded-t-sm border border-gold/20 bg-gold-dim transition-colors hover:bg-gold-glow min-h-[4px]"
                   style={{ height: `${heightPct}%` }}
                 >
-                  {/* Tooltip on hover */}
                   <div className="absolute -top-6 left-1/2 hidden -translate-x-1/2 whitespace-nowrap font-mono text-[10px] font-semibold text-gold group-hover:block">
                     {day.query_count}
                   </div>
@@ -74,7 +72,6 @@ export default function TrendChart() {
         </div>
       </div>
 
-      {/* Legend */}
       <div className="flex gap-4 border-t border-border px-5 py-3">
         <div className="flex items-center gap-1.5 text-[11px] text-muted">
           <span className="h-2 w-2 rounded-full bg-gold"></span> Answered

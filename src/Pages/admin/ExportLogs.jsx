@@ -5,7 +5,6 @@ import api from "../../services/api";
 export default function ExportLogs() {
   const queryClient = useQueryClient();
 
-  // Initialize with empty strings so it pulls ALL data by default unless the user specifies
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -184,7 +183,6 @@ export default function ExportLogs() {
           </button>
         </div>
 
-        {/* FIXED: Now points to the dedicated /analytics endpoint */}
         <div className="rounded-xl border border-border bg-surface p-6 transition-colors hover:border-gold">
           <div className="mb-3 text-3xl">📉</div>
           <div className="font-display text-sm font-bold text-white mb-1">

@@ -16,23 +16,18 @@ export default function Login() {
     setError("");
 
     try {
-      // 1. FastAPI OAuth2 expects form-urlencoded data, not raw JSON
       const formData = new URLSearchParams();
       formData.append("username", username);
       formData.append("password", password);
 
-      // Note: Make sure this endpoint matches your FastAPI router!
-      // (Usually it is /auth/token)
       const response = await api.post("/auth/login", formData);
       const token = response.data.access_token;
 
-      // 2. Fetch the staff member's profile
       const userResponse = await api.get("/users/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const userData = userResponse.data;
 
-      // 3. Hand everything over to the Context
       login(token, userData);
     } catch (err) {
       setError(

@@ -17,7 +17,7 @@ export default function TopQueries() {
   }
 
   const queries = topQueries || [];
-  // The first item is always the highest since the backend orders by DESC
+
   const maxCount = queries[0]?.count || 1;
 
   return (

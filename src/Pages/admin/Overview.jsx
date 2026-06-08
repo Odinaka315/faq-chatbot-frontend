@@ -18,7 +18,6 @@ export default function Overview() {
   });
   return (
     <div className="space-y-6">
-      {/* Alert Banner from Template */}
       <AlertBanner />
       <MetricCards />
 
@@ -27,14 +26,12 @@ export default function Overview() {
         <TopQueries />
       </div>
 
-      {/* The 3-Column Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <RetrievalAccuracy metrics={metrics} />
         <QueryCategories />
         <QuickAddFAQ />
       </div>
 
-      {/* Recent Logs */}
       <RecentLogs />
     </div>
   );
