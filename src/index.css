@@ -1,17 +1,108 @@
+/* Add these Google Fonts at the very top of the file */
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap");
+
 @import "tailwindcss";
 
 @theme {
+  /* Your existing Admin colors... */
   --color-bg: #0b0f1a;
   --color-surface: #111827;
   --color-surface2: #1a2235;
   --color-border: rgba(255, 255, 255, 0.07);
-  --color-navy: #0d2149;
   --color-gold: #c9a84c;
   --color-gold-dim: rgba(201, 168, 76, 0.15);
   --color-gold-glow: rgba(201, 168, 76, 0.25);
   --color-text: rgba(255, 255, 255, 0.88);
   --color-muted: rgba(255, 255, 255, 0.4);
   --color-dim: rgba(255, 255, 255, 0.12);
+  --spacing-sidebar: 240px;
+
+  /* NEW: Student UI Colors & Fonts */
+  --color-navy: #0d2149;
+  --color-navy-mid: #162d5e;
+  --color-navy-soft: #1e3a70;
+  --color-gold-lt: #e8c96a;
+  --color-gold-pale: #f5e9c5;
+  --color-cream: #faf8f3;
+  --color-slate: #475569;
+  --color-mist: #e8edf5;
+
+  --font-playfair: "Playfair Display", serif;
+  --font-dm: "DM Sans", sans-serif;
+}
+
+/* Custom Utilities for the Student Homepage */
+@layer utilities {
+  .bg-grain {
+    position: relative;
+  }
+  .bg-grain::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.8s ease both;
+  }
+
+  .animate-fade-msg {
+    animation: fadeMsg 0.4s ease both;
+  }
+
+  .animate-pulse-dot {
+    animation: pulseDot 2s infinite;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeMsg {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseDot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 @utility no-scrollbar {
   /* Firefox */
