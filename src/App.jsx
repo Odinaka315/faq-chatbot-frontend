@@ -8,6 +8,11 @@ import ExportLogs from "./Pages/admin/ExportLogs";
 import StudentLayout from "./Layout/StudentLayout";
 import StudentHome from "./Pages/Student/StudentHome";
 import Chatbot from "./Pages/Student/Chatbot";
+import Student404 from "./Pages/Student/Student404";
+import Admin404 from "./Pages/admin/Admin404";
+import AdminUnderDev from "./Pages/admin/AdminUnderDev";
+import StudentComingSoon from "./Pages/Student/StudentComingSoon";
+
 // import StudentChatbot from "./pages/student/StudentChatbot"; // Future student app
 
 export default function App() {
@@ -23,11 +28,26 @@ export default function App() {
             </StudentLayout>
           }
         />
+        <Route
+          path="*"
+          element={
+            <StudentLayout>
+              <Student404 />
+            </StudentLayout>
+          }
+        />
+        <Route path="/chat" element={<Chatbot />} />
+        <Route
+          path="/pagecomingsoon"
+          element={
+            <StudentLayout>
+              <StudentComingSoon />
+            </StudentLayout>
+          }
+        />
 
-        {/* 2. The Hidden Backdoor Entry */}
         <Route path="/administration" element={<Login />} />
 
-        {/* 3. The Guarded Admin Dashboard Face */}
         <Route
           path="/dashboard"
           element={
@@ -48,10 +68,29 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/chat" element={<Chatbot />} />
 
         {/* Global Fallback Redirect to Student Face */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+
+        <Route
+          path="/dashboard/*"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Admin404 />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/adminunderdev"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <AdminUnderDev />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </div>
   );

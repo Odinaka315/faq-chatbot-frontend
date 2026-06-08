@@ -91,12 +91,6 @@ export default function StudentFooter() {
               <span className="text-[12.5px] text-white/45">
                 UI Campus, Ibadan
               </span>
-              <Link
-                to="/administration"
-                className="text-[12.5px] text-gold/70 hover:text-gold transition-colors mt-2"
-              >
-                Admin Login
-              </Link>
             </div>
           </div>
         </div>

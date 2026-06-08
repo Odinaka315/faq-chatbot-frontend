@@ -168,13 +168,13 @@ export default function Chatbot() {
             Home
           </Link>
           <a
-            href="#"
+            href="/pagecomingsoon"
             className="text-white/55 text-[12.5px] font-medium px-3 py-1.5 rounded-full hover:text-white hover:bg-white/10 transition-colors"
           >
             Programmes
           </a>
           <a
-            href="#"
+            href="/pagecomingsoon"
             className="text-white/55 text-[12.5px] font-medium px-3 py-1.5 rounded-full hover:text-white hover:bg-white/10 transition-colors"
           >
             Contact
