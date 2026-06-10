@@ -2,7 +2,8 @@ export default function StudentHome() {
   return (
     <>
       <section className="grid grid-cols-1 lg:grid-cols-2 min-h-screen pt-16 relative overflow-hidden">
-        <div className="bg-navy px-14 py-20 flex flex-col justify-center relative overflow-hidden">
+        {/* Adjusted padding: px-4 on mobile, scaling up to original px-14 on desktop */}
+        <div className="bg-navy px-4 sm:px-8 lg:px-14 py-20 flex flex-col justify-center relative overflow-hidden">
           {/* Decorative gradients/circles */}
           <div className="absolute -bottom-[120px] -left-[120px] w-[420px] h-[420px] rounded-full bg-[radial-gradient(circle,rgba(201,168,76,0.18)_0%,transparent_70%)] pointer-events-none"></div>
           <div className="absolute top-[60px] -right-[60px] w-[220px] h-[220px] rounded-full border border-gold/15 pointer-events-none"></div>
@@ -66,8 +67,8 @@ export default function StudentHome() {
           </div>
         </div>
 
-        {/* Right chat preview */}
-        <div className="bg-cream flex items-center justify-center p-12 relative">
+        {/* Right chat preview - Hidden on mobile, completely identical on desktop */}
+        <div className="hidden lg:flex bg-cream items-center justify-center p-12 relative">
           <div className="absolute left-0 top-[12%] bottom-[12%] w-[3px] bg-gradient-to-b from-transparent via-gold to-transparent"></div>
 
           {/* Floating Badge */}
@@ -189,8 +190,8 @@ export default function StudentHome() {
       </section>
 
       {/* ── FEATURES STRIP ── */}
-      <section className="bg-white px-14 py-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 border-y border-mist">
-        <div className="p-8 border-r border-mist hover:bg-cream transition-colors group">
+      <section className="bg-white px-4 sm:px-8 lg:px-14 py-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 border-y border-mist">
+        <div className="p-8 border-b md:border-b-0 md:border-r border-mist hover:bg-cream transition-colors group">
           <span className="text-[28px] block mb-4 group-hover:scale-110 transition-transform">
             ⚡
           </span>
@@ -202,7 +203,7 @@ export default function StudentHome() {
             answers in seconds, any time of day.
           </p>
         </div>
-        <div className="p-8 border-r border-mist hover:bg-cream transition-colors group">
+        <div className="p-8 border-b md:border-b-0 lg:border-r border-mist hover:bg-cream transition-colors group">
           <span className="text-[28px] block mb-4 group-hover:scale-110 transition-transform">
             🎯
           </span>
@@ -214,7 +215,7 @@ export default function StudentHome() {
             to Computer Science.
           </p>
         </div>
-        <div className="p-8 border-r border-mist hover:bg-cream transition-colors group">
+        <div className="p-8 border-b md:border-b-0 md:border-r border-mist hover:bg-cream transition-colors group">
           <span className="text-[28px] block mb-4 group-hover:scale-110 transition-transform">
             📋
           </span>
@@ -243,7 +244,7 @@ export default function StudentHome() {
       {/* ── HOW IT WORKS ── */}
       <section
         id="how"
-        className="px-14 py-[100px] bg-cream grid grid-cols-1 lg:grid-cols-2 gap-20 items-center"
+        className="px-4 sm:px-8 lg:px-14 py-[100px] bg-cream grid grid-cols-1 lg:grid-cols-2 gap-20 items-center"
       >
         <div>
           <p className="flex items-center gap-2 text-[10px] font-bold tracking-[3px] uppercase text-gold mb-4">
@@ -305,8 +306,8 @@ export default function StudentHome() {
           </div>
         </div>
 
-        {/* Pipeline Visual */}
-        <div className="bg-navy rounded-[24px] p-10 pt-10 flex flex-col relative overflow-hidden">
+        {/* Pipeline Visual - Hidden on mobile, completely identical on desktop */}
+        <div className="hidden lg:flex bg-navy rounded-[24px] p-10 pt-10 flex flex-col relative overflow-hidden">
           <div className="absolute -top-[80px] -right-[80px] w-[280px] h-[280px] rounded-full bg-[radial-gradient(circle,rgba(201,168,76,0.15)_0%,transparent_70%)]"></div>
 
           <div className="font-playfair text-[13px] font-semibold text-gold-lt tracking-[1px] uppercase mb-7 relative z-10">
@@ -392,7 +393,7 @@ export default function StudentHome() {
       </section>
 
       {/* ── CATEGORIES ── */}
-      <section className="bg-white px-14 py-20">
+      <section className="bg-white px-4 sm:px-8 lg:px-14 py-20">
         <p className="flex items-center gap-2 text-[10px] font-bold tracking-[3px] uppercase text-gold mb-4">
           <span className="block w-5 h-[2px] bg-gold rounded-full"></span>
           What You Can Ask
@@ -458,7 +459,7 @@ export default function StudentHome() {
       </section>
 
       {/* ── TESTIMONIALS ── */}
-      <section className="bg-navy px-14 py-20 relative overflow-hidden">
+      <section className="bg-navy px-4 sm:px-8 lg:px-14 py-20 relative overflow-hidden">
         <div className="absolute -top-10 left-10 font-playfair text-[300px] font-bold text-gold/5 leading-none pointer-events-none select-none">
           "
         </div>
@@ -524,7 +525,7 @@ export default function StudentHome() {
       </section>
 
       {/* ── CTA BANNER ── */}
-      <section className="bg-gold px-14 py-[72px] flex flex-col md:flex-row items-center justify-between gap-10">
+      <section className="bg-gold px-4 sm:px-8 lg:px-14 py-[72px] flex flex-col md:flex-row items-center justify-between gap-10">
         <div>
           <h2 className="font-playfair text-[clamp(26px,3vw,38px)] font-bold text-navy leading-[1.2] max-w-[480px]">
             Ready to find your perfect programme at UI?
