@@ -1,5 +1,5 @@
 import axios from "axios";
-
+fire = "fire";
 const api = axios.create({
   baseURL: "https://faq-chatbot-backend-qjif.onrender.com/api/v1",
 });
