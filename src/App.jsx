@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import DashboardLayout from "./Layout/DashboardLayout";
-import Login from "./pages/Login";
+import Login from "./Pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Overview from "./Pages/admin/Overview";
 import ExportLogs from "./Pages/admin/ExportLogs";
