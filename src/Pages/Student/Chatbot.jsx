@@ -15,37 +15,135 @@ export default function Chatbot() {
 
   // Mobile Responsiveness States
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
-  const [sessionId] = useState(() => {
-    let currentSession = sessionStorage.getItem("chat_session_id");
-    if (!currentSession) {
-      // Generate a secure random UUID (fallback to timestamp if browser doesn't support crypto)
-      currentSession =
-        window.crypto && crypto.randomUUID
-          ? crypto.randomUUID()
-          : `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-      sessionStorage.setItem("chat_session_id", currentSession);
-    }
-    return currentSession;
-  });
+
+  // Dynamic Session Tracking
+  const [activeSessionId, setActiveSessionId] = useState("");
+  const [recentSessions, setRecentSessions] = useState([]);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  // 1. Load recent sessions from localStorage on component mount
 
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
+  // Secure UUID fallback generator
+  const generateUniqueId = () => {
+    return window.crypto && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  };
+
+  // 2. Fetch conversational history from the FastAPI backend logs
+  const loadSessionHistory = async (sessionId) => {
+    setActiveSessionId(sessionId);
+    setIsTyping(true);
+    setMessages([]);
+
+    try {
+      const res = await api.get(`/chat/history/${sessionId}`);
+      const historyLogs = res.data.messages || [];
+
+      if (historyLogs.length > 0) {
+        // Map backend schemas to frontend layout nodes
+        const mappedMessages = historyLogs.map((msg, index) => ({
+          id: `hist_${index}_${Date.now()}`,
+          type: msg.sender, // expects 'user' or 'bot'
+          text: msg.text,
+          meta: msg.meta || { score: 1.0, followups: [] },
+        }));
+        setMessages(mappedMessages);
+
+        // Recalculate stats for the loaded session
+        const botMsgs = mappedMessages.filter((m) => m.type === "bot");
+        const unansweredCount = botMsgs.filter(
+          (m) => (m.meta?.score || 0) < 0.3,
+        ).length;
+        const totalScore = botMsgs.reduce(
+          (acc, curr) => acc + (curr.meta?.score || 0),
+          0,
+        );
+
+        setStats({
+          count: botMsgs.length,
+          scoreTotal: totalScore,
+          unanswered: unansweredCount,
+        });
+      }
+    } catch (err) {
+      console.error("Error retrieving historical session track logs:", err);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+  useEffect(() => {
+    const savedSessions =
+      JSON.parse(localStorage.getItem("ui_recent_chats")) || [];
+    setRecentSessions(savedSessions);
+
+    if (savedSessions.length > 0) {
+      // Automatically restore the latest active chat session
+      loadSessionHistory(savedSessions[0].id);
+    } else {
+      // Fresh visitor initialization
+      const freshId = generateUniqueId();
+      setActiveSessionId(freshId);
+    }
+  }, []);
+
+  // 3. Update FIFO Bounded Queue tracking array
+  // 3. Update FIFO Bounded Queue tracking array
+  const updateSessionQueue = (sessionId, queryText) => {
+    let currentQueue =
+      JSON.parse(localStorage.getItem("ui_recent_chats")) || [];
+
+    // Check if this session is already in the queue
+    const existingSession = currentQueue.find(
+      (session) => session.id === sessionId,
+    );
+
+    // Eliminate duplication to cleanly bubble the active chat card to the top
+    currentQueue = currentQueue.filter((session) => session.id !== sessionId);
+
+    // If it exists, KEEP the original preview. If it's new, make a new preview.
+    const previewText = existingSession
+      ? existingSession.preview
+      : queryText.length > 24
+        ? queryText.substring(0, 22) + "..."
+        : queryText;
+
+    // Insert the session details at position zero (the very top)
+    currentQueue.unshift({
+      id: sessionId,
+      preview: previewText,
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    });
+
+    // Enforce the strict upper ceiling rule of 6 rows max (FIFO eviction step)
+    if (currentQueue.length > 6) {
+      currentQueue.pop();
+    }
+
+    localStorage.setItem("ui_recent_chats", JSON.stringify(currentQueue));
+    setRecentSessions(currentQueue);
+  };
+
   // Chat Mutation
   const chatMutation = useMutation({
     mutationFn: async (queryText) => {
       const res = await api.post("/chat", {
         message: queryText,
-        session_id: sessionId,
+        session_id: activeSessionId,
       });
-      return res.data;
+      return { data: res.data, queryText };
     },
-    onSuccess: (data) => {
+    onSuccess: ({ data, queryText }) => {
       setIsTyping(false);
       setMessages((prev) => [
         ...prev,
@@ -82,6 +180,10 @@ export default function Chatbot() {
     const query = text || input.trim();
     if (!query) return;
 
+    // Trigger the queue update on EVERY message sent.
+    // Our smart function will handle moving it to the top!
+    updateSessionQueue(activeSessionId, query);
+
     // Add user message
     setMessages((prev) => [
       ...prev,
@@ -90,7 +192,6 @@ export default function Chatbot() {
     setInput("");
     setIsTyping(true);
 
-    // Reset textarea height
     if (inputRef.current) inputRef.current.style.height = "auto";
 
     // Call API
@@ -110,19 +211,30 @@ export default function Chatbot() {
   };
 
   const startNewChat = () => {
+    const freshId = generateUniqueId();
+    setActiveSessionId(freshId);
     setMessages([]);
     setStats({ count: 0, scoreTotal: 0, unanswered: 0 });
-    if (window.innerWidth < 1024) setIsLeftSidebarOpen(false); // Close sidebar on mobile
+    if (window.innerWidth < 1024) setIsLeftSidebarOpen(false);
   };
+
   const handleTopicClick = (topicText) => {
-    setInput(`Tell me about ${topicText} `); // Populates the input field
+    setInput(`Tell me about ${topicText} `);
     if (inputRef.current) {
-      inputRef.current.focus(); // Immediately focuses the cursor in the box
+      inputRef.current.focus();
     }
     if (window.innerWidth < 1024) {
-      setIsLeftSidebarOpen(false); // Closes the hamburger menu on mobile
+      setIsLeftSidebarOpen(false);
     }
   };
+
+  const handleSessionCardClick = (sessionId) => {
+    loadSessionHistory(sessionId);
+    if (window.innerWidth < 1024) {
+      setIsLeftSidebarOpen(false); // Close sidebar on mobile select
+    }
+  };
+
   const avgConf =
     stats.count > 0 ? Math.round((stats.scoreTotal / stats.count) * 100) : 0;
 
@@ -130,7 +242,6 @@ export default function Chatbot() {
     <div className="flex flex-col h-screen overflow-hidden bg-cream font-dm">
       {/* ── TOPBAR ── */}
       <div className="h-[60px] bg-[#0d2149f7] backdrop-blur-md border-b border-gold/20 flex items-center px-4 md:px-6 shrink-0 z-50">
-        {/* Hamburger Menu (Mobile Only) */}
         <button
           onClick={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
           className="lg:hidden mr-4 text-white p-1 hover:bg-white/10 rounded"
@@ -190,7 +301,6 @@ export default function Chatbot() {
       </div>
 
       <div className="flex flex-1 overflow-hidden relative">
-        {/* Overlay for mobile sidebar */}
         {isLeftSidebarOpen && (
           <div
             className="fixed inset-0 bg-navy/50 z-30 lg:hidden backdrop-blur-sm"
@@ -214,38 +324,77 @@ export default function Chatbot() {
             </button>
           </div>
 
-          <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
-            <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-400 mb-2 px-1">
-              Browse by Topic
+          <div className="p-4 flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-6">
+            {/* Browse By Topic Section */}
+            <div>
+              <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-400 mb-2 px-1">
+                Browse by Topic
+              </div>
+              {[
+                { icon: "📊", text: "Cut-Off Marks", count: 312 },
+                { icon: "📝", text: "JAMB Subjects", count: 194 },
+                { icon: "🗺️", text: "How to Apply", count: 248 },
+                { icon: "💼", text: "Career Pathways", count: 172 },
+                { icon: "📋", text: "Post-UTME", count: 143 },
+                { icon: "🎓", text: "Direct Entry", count: 118 },
+                { icon: "📚", text: "O'Level Reqs", count: 97 },
+                { icon: "🏠", text: "Fees & Housing", count: 52 },
+              ].map((topic, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleTopicClick(topic.text)}
+                  className="w-full flex items-center justify-between p-2 rounded-lg text-[12.5px] text-slate-600 hover:bg-gold-pale hover:text-navy transition-colors mb-0.5 group text-left"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-5 text-center text-[14px]">
+                      {topic.icon}
+                    </span>
+                    <span className="font-medium group-hover:font-semibold">
+                      {topic.text}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-400 group-hover:text-navy/50 transition-colors">
+                    {topic.count}
+                  </span>
+                </button>
+              ))}
             </div>
-            {[
-              { icon: "📊", text: "Cut-Off Marks", count: 312 },
-              { icon: "📝", text: "JAMB Subjects", count: 194 },
-              { icon: "🗺️", text: "How to Apply", count: 248 },
-              { icon: "💼", text: "Career Pathways", count: 172 },
-              { icon: "📋", text: "Post-UTME", count: 143 },
-              { icon: "🎓", text: "Direct Entry", count: 118 },
-              { icon: "📚", text: "O'Level Reqs", count: 97 },
-              { icon: "🏠", text: "Fees & Housing", count: 52 },
-            ].map((topic, i) => (
-              <button
-                key={i}
-                onClick={() => handleTopicClick(topic.text)}
-                className="w-full flex items-center justify-between p-2 rounded-lg text-[12.5px] text-slate-600 hover:bg-gold-pale hover:text-navy transition-colors mb-0.5 group text-left"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="w-5 text-center text-[14px]">
-                    {topic.icon}
-                  </span>
-                  <span className="font-medium group-hover:font-semibold">
-                    {topic.text}
-                  </span>
+
+            {/* NEW EXTENSION: Recent Activity Logs Array Stack */}
+            {recentSessions.length > 0 && (
+              <div className="animate-in fade-in duration-300">
+                <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-400 mb-2.5 px-1 border-t border-mist/50 pt-4">
+                  Recent History
                 </div>
-                <span className="text-[10px] font-mono text-slate-400 group-hover:text-navy/50 transition-colors">
-                  {topic.count}
-                </span>
-              </button>
-            ))}
+                <div className="space-y-1.5">
+                  {recentSessions.map((session) => (
+                    <button
+                      key={session.id}
+                      onClick={() => handleSessionCardClick(session.id)}
+                      className={`w-full text-left p-2.5 rounded-xl border transition-all flex items-center justify-between group ${
+                        activeSessionId === session.id
+                          ? "bg-gold-pale/60 border-gold/30 shadow-sm"
+                          : "bg-white border-mist/50 hover:bg-slate-50 hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="min-w-0 flex-1 pr-2">
+                        <div
+                          className={`text-[12.5px] truncate transition-colors ${activeSessionId === session.id ? "font-semibold text-navy" : "text-slate-600 group-hover:text-navy"}`}
+                        >
+                          💬 {session.preview}
+                        </div>
+                        <div className="text-[10px] text-slate-400 mt-0.5 ml-5">
+                          {session.timestamp}
+                        </div>
+                      </div>
+                      <span className="text-slate-300 group-hover:text-slate-400 transition-colors text-xs shrink-0 font-mono">
+                        →
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="p-3.5 border-t border-mist bg-slate-50/50">
@@ -284,7 +433,6 @@ export default function Chatbot() {
             </div>
           </div>
 
-          {/* Confidence Bar */}
           <div className="h-[2px] bg-mist shrink-0 w-full">
             <div
               className="h-full bg-gradient-to-r from-gold to-green-500 transition-all duration-500"
@@ -340,27 +488,22 @@ export default function Chatbot() {
                   className={`flex flex-col gap-1 ${m.type === "user" ? "items-end" : "items-start"}`}
                 >
                   <div
-                    className={`px-4 py-2.5 text-[13.5px] leading-[1.6] ${
-                      m.type === "bot"
-                        ? "bg-white text-navy border border-mist shadow-sm rounded-[4px_18px_18px_18px]"
-                        : "bg-navy text-white rounded-[18px_4px_18px_18px]"
-                    }`}
+                    className={`px-4 py-2.5 text-[13.5px] leading-[1.6] ${m.type === "bot" ? "bg-white text-navy border border-mist shadow-sm rounded-[4px_18px_18px_18px]" : "bg-navy text-white rounded-[18px_4px_18px_18px]"}`}
                     dangerouslySetInnerHTML={{ __html: m.text }}
                   ></div>
 
-                  {/* Meta & Followups (Bot Only) */}
                   {m.type === "bot" && (
                     <>
                       <div className="flex items-center gap-1.5 text-[10.5px] text-slate-400 mt-0.5">
                         <span
-                          className={`px-2 py-[1px] rounded-full font-mono font-semibold ${m.meta.score >= 0.65 ? "bg-green-500/10 text-green-600" : m.meta.score >= 0.35 ? "bg-amber-500/10 text-amber-600" : "bg-red-500/10 text-red-500"}`}
+                          className={`px-2 py-[1px] rounded-full font-mono font-semibold ${m.meta?.score >= 0.65 ? "bg-green-500/10 text-green-600" : m.meta?.score >= 0.35 ? "bg-amber-500/10 text-amber-600" : "bg-red-500/10 text-red-500"}`}
                         >
-                          {m.meta.score >= 0.65
+                          {m.meta?.score >= 0.65
                             ? "✓ High confidence"
-                            : m.meta.score >= 0.35
+                            : m.meta?.score >= 0.35
                               ? "⚠ Medium confidence"
                               : "⚠ Low confidence"}{" "}
-                          {Math.round(m.meta.score * 100)}%
+                          {Math.round((m.meta?.score || 0) * 100)}%
                         </span>
                         {new Date().toLocaleTimeString([], {
                           hour: "2-digit",
@@ -368,7 +511,7 @@ export default function Chatbot() {
                         })}
                       </div>
 
-                      {m.meta.followups && m.meta.followups.length > 0 && (
+                      {m.meta?.followups && m.meta.followups.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mt-1">
                           {m.meta.followups.map((fu, i) => (
                             <button
@@ -395,7 +538,6 @@ export default function Chatbot() {
               </div>
             ))}
 
-            {/* Typing Indicator */}
             {isTyping && (
               <div className="flex gap-2.5 max-w-[75%] self-start animate-in fade-in">
                 <div className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center bg-navy text-white text-sm">
@@ -455,7 +597,7 @@ export default function Chatbot() {
           </div>
         </div>
 
-        {/* ── RIGHT INFO PANEL (Hidden on Mobile) ── */}
+        {/* ── RIGHT INFO PANEL ── */}
         <div className="hidden xl:flex w-[260px] bg-white border-l border-mist flex-col shrink-0 overflow-y-auto custom-scrollbar">
           <div className="p-4 border-b border-mist text-[11px] font-bold tracking-[2px] uppercase text-slate-500">
             Session Info
@@ -533,23 +675,7 @@ export default function Chatbot() {
               rel="noreferrer"
               className="flex items-center gap-2 p-2 rounded-lg text-[12px] text-slate-600 hover:bg-cream hover:text-navy transition-colors"
             >
-              <span>📝</span> JAMB Portal
-            </a>
-            <a
-              href="https://jamb.gov.ng"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 p-2 rounded-lg text-[12px] text-slate-600 hover:bg-cream hover:text-navy transition-colors"
-            >
-              <span>🏛️</span> All Faculties
-            </a>
-            <a
-              href="https://jamb.gov.ng"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 p-2 rounded-lg text-[12px] text-slate-600 hover:bg-cream hover:text-navy transition-colors"
-            >
-              <span>🌐</span> UI official website
+              <span>2️⃣</span> JAMB Portal
             </a>
           </div>
           <div className="p-4 border-none">
