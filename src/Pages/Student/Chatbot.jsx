@@ -3,6 +3,10 @@ import { Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import api from "../../services/api";
 
+// ⚠️ PASTE YOUR GOOGLE FORM LINK HERE
+const FEEDBACK_FORM_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLSf2LqWpof_Re26fWh6AZ7llOWBOUHqmHyOnnPGOINCHGLMYlQ/viewform?usp=publish-editor";
+
 export default function Chatbot() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -23,8 +27,6 @@ export default function Chatbot() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // 1. Load recent sessions from localStorage on component mount
-
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -37,7 +39,7 @@ export default function Chatbot() {
       : `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   };
 
-  // 2. Fetch conversational history from the FastAPI backend logs
+  // Fetch conversational history from the FastAPI backend logs
   const loadSessionHistory = async (sessionId) => {
     setActiveSessionId(sessionId);
     setIsTyping(true);
@@ -79,6 +81,8 @@ export default function Chatbot() {
       setIsTyping(false);
     }
   };
+
+  // Load recent sessions from localStorage on component mount
   useEffect(() => {
     const savedSessions =
       JSON.parse(localStorage.getItem("ui_recent_chats")) || [];
@@ -94,8 +98,7 @@ export default function Chatbot() {
     }
   }, []);
 
-  // 3. Update FIFO Bounded Queue tracking array
-  // 3. Update FIFO Bounded Queue tracking array
+  // Update FIFO Bounded Queue tracking array
   const updateSessionQueue = (sessionId, queryText) => {
     let currentQueue =
       JSON.parse(localStorage.getItem("ui_recent_chats")) || [];
@@ -145,15 +148,32 @@ export default function Chatbot() {
     },
     onSuccess: ({ data, queryText }) => {
       setIsTyping(false);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          type: "bot",
-          text: data.message,
-          meta: { score: data.confidence_score, followups: data.followups },
-        },
-      ]);
+
+      setMessages((prev) => {
+        const botCount = prev.filter((m) => m.type === "bot").length;
+
+        const newMessages = [
+          ...prev,
+          {
+            id: Date.now(),
+            type: "bot",
+            text: data.message,
+            meta: { score: data.confidence_score, followups: data.followups },
+          },
+        ];
+
+        // 🌟 THE TRIGGER: Exactly at the 5th exchange, push the feedback request
+        if (botCount === 4) {
+          newMessages.push({
+            id: Date.now() + 1,
+            type: "bot",
+            text: `I hope I've been helpful! Since this is a research project, I'd greatly appreciate it if you could take 2 minutes to evaluate my usability here:<br/><br/><a href="${FEEDBACK_FORM_URL}" target="_blank" style="display: inline-block; background-color: #f1e5ac; color: #0d2149; padding: 8px 16px; border-radius: 8px; font-weight: bold; text-decoration: none; border: 1px solid #d4af37;">📝 Provide Feedback</a>`,
+            meta: null, // Set to null so the confidence UI doesn't render for this specific message
+          });
+        }
+
+        return newMessages;
+      });
 
       // Update Stats
       setStats((prev) => ({
@@ -181,7 +201,6 @@ export default function Chatbot() {
     if (!query) return;
 
     // Trigger the queue update on EVERY message sent.
-    // Our smart function will handle moving it to the top!
     updateSessionQueue(activeSessionId, query);
 
     // Add user message
@@ -293,6 +312,16 @@ export default function Chatbot() {
         </div>
 
         <div className="ml-auto flex items-center gap-3">
+          {/* 🌟 PERSISTENT FEEDBACK BUTTON */}
+          <a
+            href={FEEDBACK_FORM_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="hidden sm:flex items-center gap-1.5 bg-gold/20 text-gold border border-gold/30 px-3 py-1.5 rounded-full text-[11.5px] font-semibold hover:bg-gold hover:text-navy transition-colors mr-2"
+          >
+            📝 Evaluate Advisor
+          </a>
+
           <div className="hidden sm:flex items-center gap-1.5 text-[11.5px] text-white/60">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_6px_#22c55e] animate-pulse"></span>
             Advisor Online
@@ -325,7 +354,6 @@ export default function Chatbot() {
           </div>
 
           <div className="p-4 flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-6">
-            {/* Browse By Topic Section */}
             <div>
               <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-400 mb-2 px-1">
                 Browse by Topic
@@ -360,7 +388,6 @@ export default function Chatbot() {
               ))}
             </div>
 
-            {/* NEW EXTENSION: Recent Activity Logs Array Stack */}
             {recentSessions.length > 0 && (
               <div className="animate-in fade-in duration-300">
                 <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-400 mb-2.5 px-1 border-t border-mist/50 pt-4">
@@ -492,7 +519,8 @@ export default function Chatbot() {
                     dangerouslySetInnerHTML={{ __html: m.text }}
                   ></div>
 
-                  {m.type === "bot" && (
+                  {/* 🌟 ADDED m.meta CHECK HERE so the special feedback message doesn't crash */}
+                  {m.type === "bot" && m.meta && (
                     <>
                       <div className="flex items-center gap-1.5 text-[10.5px] text-slate-400 mt-0.5">
                         <span
@@ -678,7 +706,27 @@ export default function Chatbot() {
               <span>2️⃣</span> JAMB Portal
             </a>
           </div>
+
           <div className="p-4 border-none">
+            <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-400 mb-3">
+              Research Evaluation
+            </div>
+            <p className="text-[12px] text-slate-500 leading-[1.65] mb-3.5">
+              Help improve this system by evaluating your experience using our
+              academic survey.
+            </p>
+            {/* 🌟 PERSISTENT FEEDBACK BUTTON (SIDEBAR) */}
+            <a
+              href={FEEDBACK_FORM_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-[10px] bg-gold-pale border border-gold text-navy text-[12.5px] font-semibold hover:bg-gold hover:text-white transition-all"
+            >
+              <span>📝</span> Evaluate System
+            </a>
+          </div>
+
+          <div className="p-4 border-none border-t border-mist pt-6">
             <div className="text-[10px] font-bold tracking-[1.5px] uppercase text-slate-400 mb-3">
               Need More Help?
             </div>
